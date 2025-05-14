@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+.json-inspector__value_string span {
+  word-wrap: break-word;
+}
