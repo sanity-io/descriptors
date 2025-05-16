@@ -129,7 +129,7 @@ function App() {
         setStage('done')
       }
     }
-  }, [stage])
+  }, [keys, messages, prev, stage])
 
   const clear = useCallback(() => {
     for (const key of keys) {
@@ -140,60 +140,69 @@ function App() {
   }, [])
 
   return (
-    <div className="flex my-2">
-      <div className="p-2 mx-4">
-        <h2 className="font-bold text-2xl">Client schema</h2>
-        <DefCard title="Registry" data={final.registry} />
+    <div className="my-2 px-4">
+      <div className="prose">
+        <h1>Serialized Schema Synchronization</h1>
+        <p>
+          This is a demo which shows how the serialized definitions of a simplified schema format
+          would look like and how we can efficiently synchronize it with the server.
+        </p>
+      </div>
+      <div className="flex my-2">
+        <div className="p-2 mx-4">
+          <h2 className="font-bold text-2xl">Client schema</h2>
+          <DefCard title="Registry" data={final.registry} />
 
-        {final.namedTypes.map((namedType) => (
-          <DefCard
-            key={namedType.name}
-            title={`Type: ${namedType.name}`}
-            data={namedType}
-            isExpanded={(keyPath) => ['typeDef'].includes(keyPath)}
-          />
-        ))}
-      </div>
-      <div className="p-2 mx-4 w-[400px]">
-        <div className="flex">
-          <h2 className="font-bold text-2xl">Communication</h2>
-          <div className="flex-1" />
-          {stage !== 'done' && (
-            <button className="border text-white bg-blue-400 px-4 py-1 rounded-md" onClick={next}>
-              Next
+          {final.namedTypes.map((namedType) => (
+            <DefCard
+              key={namedType.name}
+              title={`Type: ${namedType.name}`}
+              data={namedType}
+              isExpanded={(keyPath) => ['typeDef'].includes(keyPath)}
+            />
+          ))}
+        </div>
+        <div className="p-2 mx-4 w-[400px]">
+          <div className="flex">
+            <h2 className="font-bold text-2xl">Communication</h2>
+            <div className="flex-1" />
+            {stage !== 'done' && (
+              <button className="border text-white bg-blue-400 px-4 py-1 rounded-md" onClick={next}>
+                Next
+              </button>
+            )}
+          </div>
+          <div>
+            <span className="font-semibold">{totalMessageSize}</span> bytes transferred
+          </div>
+          {messages.map((message, idx) => (
+            <DefCard
+              key={idx}
+              title={message.type === 'request' ? 'Client -> Server' : 'Client <- Server'}
+              data={message.content}
+              isExpanded={() => true}
+            />
+          ))}
+        </div>
+        <div className="p-2 mx-4">
+          <div className="flex">
+            <h2 className="font-bold text-2xl">Server</h2>
+            <div className="flex-1" />
+            <button className="border text-white bg-blue-400 px-4 py-1 rounded-md" onClick={clear}>
+              Clear
             </button>
-          )}
-        </div>
-        <div>
-          <span className="font-semibold">{totalMessageSize}</span> bytes transferred
-        </div>
-        {messages.map((message, idx) => (
-          <DefCard
-            key={idx}
-            title={message.type === 'request' ? 'Client -> Server' : 'Client <- Server'}
-            data={message.content}
-            isExpanded={() => true}
-          />
-        ))}
-      </div>
-      <div className="p-2 mx-4">
-        <div className="flex">
-          <h2 className="font-bold text-2xl">Server</h2>
-          <div className="flex-1" />
-          <button className="border text-white bg-blue-400 px-4 py-1 rounded-md" onClick={clear}>
-            Clear
-          </button>
-        </div>
-        <div className="max-w-[500px]">
-          <p className="mb-4">
-            {keys.length} definitions on the server:{' '}
-            {keys.map((id) => (
-              <span key={id}>
-                <MonoSpan text={id} />{' '}
-              </span>
-            ))}
-          </p>
-          {prev && <DefCard title="Previously synced registry" data={prev} />}
+          </div>
+          <div className="max-w-[500px]">
+            <p className="mb-4">
+              {keys.length} definitions on the server:{' '}
+              {keys.map((id) => (
+                <span key={id}>
+                  <MonoSpan text={id} />{' '}
+                </span>
+              ))}
+            </p>
+            {prev && <DefCard title="Previously synced registry" data={prev} />}
+          </div>
         </div>
       </div>
     </div>

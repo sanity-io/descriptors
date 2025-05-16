@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 .json-inspector__value_string span {
   word-wrap: break-word;
