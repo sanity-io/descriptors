@@ -15,7 +15,7 @@ It has the following characteristics:
   The format is designed so that it's possible to efficiently synchronize when there's only been a few changes on the client-side.
   This is possible without the client storing any additional information about the state of the server.
 
-Here's an example of two definitions
+Here's an example of two definitions: One named schema type, and then one schema registry which ties it together (so that recursively defined types can be represented).
 
 ```ts
 {
@@ -37,6 +37,16 @@ Here's an example of two definitions
   }
 }
 ```
+
+## Usage
+
+Once a client has built a serialized definition it can **send it into Content Lake** and then start using the ID towards other services.
+It's important to realize that "sending it into Content Lake" doesn't make it visible anywhere.
+Studio can upload the schema into Content Lake and the _only_ thing that happens is that now it can use the `schemaId` towards e.g. Agent Action.
+The concept of for instance saying "dataset X has schema Y" is **not** solved here.
+What we're dealing with here is how to _represent_ that schema on the server-side and being able to _refer_ to it.
+
+## Further documentation
 
 To learn more:
 
