@@ -1,17 +1,26 @@
-import {encodeBase64, RegistryEncoder, SetSketch} from '@sanity/sdefs'
-import {JsonInspector, type JsonInspectorProps} from '@rexxars/react-json-inspector'
 import '@rexxars/react-json-inspector/json-inspector.css'
-import type {SchemaType} from './types'
 
-import schemaTypes from './schema'
+import {JsonInspector, type JsonInspectorProps} from '@rexxars/react-json-inspector'
+import {
+  decodeBase64,
+  type EncodableObject,
+  encodeBase64,
+  encodeBase64Sha256,
+  type Encoded,
+  SetBuilder,
+  SetSketch,
+} from '@sanity/descriptors'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 
-const registry = new RegistryEncoder()
+import schemaTypes from './schema'
+import type {SchemaType} from './types'
+
+const builder = new SetBuilder()
 for (const {name, type, ...typeDef} of schemaTypes as SchemaType[]) {
-  registry.addTypeDef(name, {...typeDef, subtypeOf: type})
+  builder.addObject('sanity.schema.namedType', {name, typeDef: {...typeDef, subtypeOf: type}})
 }
 
-const final = registry.finalize()
+const registry = builder.build('sanity.schema.registry')
 
 function DefCard({
   title,
@@ -35,7 +44,7 @@ type Message = {
   content: Record<string, unknown>
 }
 
-function App() {
+function App(): React.ReactElement {
   const [stage, setStage] = useState<'initial' | 'request' | 'send-more' | 'done'>('initial')
 
   const [messages, setMessages] = useState<Message[]>([])
@@ -46,12 +55,12 @@ function App() {
   )
 
   useEffect(() => {
-    if (messages.length > 1 && messages[0].content.id !== final.registry.id) {
+    if (messages.length > 1 && messages[0].content.id !== registry.set.id) {
       // The schema changed. Let's reset!
       setMessages([])
       setStage('initial')
     }
-  }, [messages, stage, final.registry.id])
+  }, [messages, stage, registry.set.id])
 
   const keys = getStoredDefs()
   const prev: {id: string; sketch: string} | null = localStorage['sdefprev']
@@ -61,12 +70,12 @@ function App() {
   const next = useCallback(() => {
     switch (stage) {
       case 'initial': {
-        setMessages([{type: 'request', content: {id: final.registry.id}}])
+        setMessages([{type: 'request', content: {id: registry.set.id}}])
         setStage('request')
         break
       }
       case 'request': {
-        if (keys.includes(final.registry.id)) {
+        if (keys.includes(registry.set.id)) {
           setMessages([...messages, {type: 'response', content: {type: 'ok'}}])
           setStage('done')
         } else if (prev) {
@@ -83,39 +92,39 @@ function App() {
         break
       }
       case 'send-more': {
-        let definitions: null | unknown[] = null
+        let descriptors: null | Encoded<string, EncodableObject>[] = null
         let base: undefined | string
         let ourSketch: undefined | string
 
-        if (prev && prev.id !== final.registry.id) {
-          let sketch = new SetSketch(32, 8)
+        if (prev && prev.id !== registry.set.id) {
+          const sketch = new SetSketch(32, 8)
           decodeBase64(prev.sketch, sketch.arr)
           sketch.toggleAll(registry.sketch)
           const decoded = sketch.decode()
           if (decoded !== null) {
-            localStorage[`sdef:${final.registry.id}`] = JSON.stringify(final.registry)
-            definitions = []
+            localStorage[`sdef:${registry.set.id}`] = JSON.stringify(registry.set)
+            descriptors = []
             base = prev.id
             ourSketch = encodeBase64(registry.sketch.arr)
             decoded.forEach((val) => {
-              const id = encodeBase64(val, '\x12\x20')
-              if (final.registry.content.includes(id)) {
-                definitions!.push(final.namedTypes.find((obj) => obj.id === id))
+              const id = encodeBase64Sha256(val)
+              if (registry.set.keys.includes(id)) {
+                descriptors!.push(registry.objectValues[id])
               }
             })
           }
         }
 
-        if (definitions === null) {
-          definitions = [final.registry, ...final.namedTypes]
+        if (descriptors === null) {
+          descriptors = [registry.set, ...Object.values(registry.objectValues)]
         }
 
-        for (const def of definitions) {
-          localStorage[`sdef:${(def as any).id}`] = JSON.stringify(def)
+        for (const def of descriptors) {
+          localStorage[`sdef:${def.id}`] = JSON.stringify(def)
         }
 
         localStorage['sdefprev'] = JSON.stringify({
-          id: final.registry.id,
+          id: registry.set.id,
           sketch: encodeBase64(registry.sketch.arr),
         })
 
@@ -123,7 +132,7 @@ function App() {
           ...messages,
           {
             type: 'request',
-            content: {id: final.registry.id, definitions, base, sketch: ourSketch},
+            content: {id: registry.set.id, descriptors, base, sketch: ourSketch},
           },
         ])
         setStage('done')
@@ -144,18 +153,18 @@ function App() {
       <div className="prose">
         <h1>Serialized Schema Synchronization</h1>
         <p>
-          This is a demo which shows how the serialized definitions of a simplified schema format
-          would look like and how we can efficiently synchronize it with the server.
+          This is a demo which shows how the descriptor of a simplified schema format would look
+          like and how we can efficiently synchronize it with the server.
         </p>
       </div>
       <div className="flex my-2">
         <div className="p-2 mx-4">
           <h2 className="font-bold text-2xl">Client schema</h2>
-          <DefCard title="Registry" data={final.registry} />
+          <DefCard title="Registry" data={registry.set} />
 
-          {final.namedTypes.map((namedType) => (
+          {Object.values(registry.objectValues).map((namedType) => (
             <DefCard
-              key={namedType.name}
+              key={namedType.id}
               title={`Type: ${namedType.name}`}
               data={namedType}
               isExpanded={(keyPath) => ['typeDef'].includes(keyPath)}
@@ -194,7 +203,7 @@ function App() {
           </div>
           <div className="max-w-[500px]">
             <p className="mb-4">
-              {keys.length} definitions on the server:{' '}
+              {keys.length} descriptors on the server:{' '}
               {keys.map((id) => (
                 <span key={id}>
                   <MonoSpan text={id} />{' '}
@@ -225,13 +234,6 @@ function getStoredDefs(): string[] {
   }
   result.sort()
   return result
-}
-
-function decodeBase64(input: string, into: Uint8Array) {
-  const binary = window.atob(input.slice(1).replaceAll('-', '+').replaceAll('_', '/'))
-  for (let i = 0; i < binary.length; i++) {
-    into[i] = binary.charCodeAt(i)
-  }
 }
 
 export default App

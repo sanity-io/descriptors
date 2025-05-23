@@ -20,7 +20,7 @@ const NUM_HASH = 3
  *
  * This is an implementation of https://doi.org/10.4230/LIPIcs.ICALP.2024.20.
  *
- * @public
+ * @internal
  */
 export class SetSketch {
   arr: Uint8Array
@@ -117,6 +117,8 @@ export class SetSketch {
  * Represents a set of Uint8Array's which are all of the same size.
  * The primary interface is the `toggle` method which either adds or removes
  * a value to the set.
+ *
+ * @beta
  */
 export class BufferSet {
   arr: Uint8Array
