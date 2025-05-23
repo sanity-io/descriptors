@@ -1,6 +1,6 @@
 {
-  "name": "@sanity/sdefs",
-  "version": "0.0.0",
+  "name": "@sanity/descriptors",
+  "version": "0.1.0",
   "description": "",
   "keywords": [],
   "license": "MIT",

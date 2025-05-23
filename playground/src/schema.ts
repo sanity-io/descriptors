@@ -168,5 +168,6 @@ export default [
   {
     name: 'hello',
     type: 'world',
+    title: 'hello!',
   },
 ] satisfies SchemaType[]

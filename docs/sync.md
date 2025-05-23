@@ -1,6 +1,6 @@
 # Synchronization Protocol
 
-The synchronization protocol for `sdefs` is based on the paper ["Better Space-Time-Robustness Trade-Offs for Set Reconciliation"][simple-set] by Djamal Belazzougui, Gregory Kucherov, and Stefan Walzer.
+The synchronization protocol for descriptors is based on the paper ["Better Space-Time-Robustness Trade-Offs for Set Reconciliation"][simple-set] by Djamal Belazzougui, Gregory Kucherov, and Stefan Walzer.
 This enables us to efficiently synchronize a schema consisting of _hundreds_ of types to the server even when just a single field has been modified.
 
 ## Approach

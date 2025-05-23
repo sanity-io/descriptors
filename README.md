@@ -1,21 +1,21 @@
-# Serialized Definitions
+# Descriptors
 
-_Serialized Definitions_ (`sdefs`) is a way of serializing definitions (e.g. schema types) so they can be easily shared across Content Lake.
+_Descriptors_ is a way of serializing definitions (e.g. schema types) so they can be easily shared across Content Lake.
 It has the following characteristics:
 
 - **JSON native:**
-  A serialized definition is encoded using JSON with support for the typical JSON values: Objects, arrays, strings, booleans, floats.
-- **Content-addressable:** Each serialized definition has an `id` which is the SHA-256 hash of the contents.
-  The same definition will always end up with the same `id`.
+  A descriptor is encoded using JSON with support for the typical JSON values: Objects, arrays, strings, booleans, floats.
+- **Content-addressable:** Each descriptor has an `id` which is the SHA-256 hash of the contents.
+  The same descriptor will always end up with the same `id`.
 - **Recursively defined:**
-  It's common for definitions to refer to _other_ definitions by their `id`.
-  That way you can refer to a whole graph of interconnected definitions by a single root `id`.
+  It's common for descriptors to refer to _other_ descriptors by their `id`.
+  That way you can refer to a whole graph of interconnected descriptors by a single root `id`.
   This is very similar to how a blockchain works, but without the utter waste of energy.
 - **Efficient synchronization:**
   The format is designed so that it's possible to efficiently synchronize when there's only been a few changes on the client-side.
   This is possible without the client storing any additional information about the state of the server.
 
-Here's an example of two definitions: One named schema type, and then one schema registry which ties it together (so that recursively defined types can be represented).
+Here's an example of two descriptors: One named schema type, and then one schema registry which ties it together (so that recursively defined types can be represented).
 
 ```ts
 {
@@ -40,7 +40,7 @@ Here's an example of two definitions: One named schema type, and then one schema
 
 ## Usage
 
-Once a client has built a serialized definition it can **send it into Content Lake** and then start using the ID towards other services.
+Once a client has built a descriptor it can **send it into Content Lake** and then start using the ID towards other services.
 It's important to realize that "sending it into Content Lake" doesn't make it visible anywhere.
 Studio can upload the schema into Content Lake and the _only_ thing that happens is that now it can use the `schemaId` towards e.g. Agent Action.
 The concept of for instance saying "dataset X has schema Y" is **not** solved here.
@@ -52,5 +52,4 @@ To learn more:
 
 - [docs/format.md](docs/format.md) describes the overall structure of the format.
 - [docs/sync.md](docs/sync.md) describes the efficient synchronization protocol.
-- [docs/schema.md](docs/schema.md) describes how we define a _schema_.
 - [playground/](playground) is a demo application which shows the synchronization protocol.

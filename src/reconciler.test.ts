@@ -1,6 +1,7 @@
-import {describe, expect, test} from 'vitest'
-import {BufferSet, SetSketch} from './reconciler'
 import {Hash} from 'sha256-uint8array'
+import {describe, expect, test} from 'vitest'
+
+import {BufferSet, SetSketch} from './reconciler'
 
 const A = [...new Hash().update('a').digest()]
 const B = [...new Hash().update('b').digest()]
