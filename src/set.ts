@@ -1,5 +1,6 @@
-import {type EncodableObject, encode, type Encoded} from './encoder'
+import {type EncodableObject, encode, type Encoded, type ID} from './encoder'
 import {SetSketch} from './reconciler'
+import type {SynchronizationRequest, SynchronizationResponse} from './sync'
 
 /**
  * A set descriptor. This follows the very specific form with a property called
@@ -7,7 +8,7 @@ import {SetSketch} from './reconciler'
  *
  * @public
  */
-export type EncodedSet<Type extends string> = Encoded<Type, {keys: string[]}>
+export type EncodedSet<Type extends string> = Encoded<Type, {keys: ID[]}>
 
 /**
  * SetSynchronization contains information about a set so that it can be
@@ -87,4 +88,54 @@ export class SetBuilder {
       sketch: this.sketch,
     }
   }
+}
+
+/**
+ * The main logic for synchronizing a set to a server.
+ *
+ * Initially this function should be invoked with `prevResponse` set to `null`.
+ * This returns a SynchronizationRequest which should then be sent to a server.
+ * Once the server returns a response this function should be invoked with this
+ * as a parameter. This proccess should be continued until this function return
+ * `null`.
+ *
+ * @param sync The set to synchronize.
+ * @param prevResponse The response from the previous request.
+ * @returns `null` when the synchronization is complete, or a request which should be sent.
+ */
+export function processSetSynchronization<Type extends string>(
+  sync: SetSynchronization<Type>,
+  prevResponse: SynchronizationResponse | null,
+): SynchronizationRequest | null {
+  const id = sync.set.id
+  if (!prevResponse) return {id}
+
+  if (prevResponse.type === 'success') return null
+
+  const descriptors: Array<Encoded<string, EncodableObject>> = []
+
+  for (const missingId of prevResponse.missingIds) {
+    const descriptor = findDescriptor(sync, missingId)
+    if (!descriptor) throw new Error(`Synchronization server is requested an unknonwn descriptor`)
+    descriptors.push(descriptor)
+  }
+
+  return {id, descriptors}
+}
+
+function findDescriptor<Type extends string>(
+  sync: SetSynchronization<Type>,
+  id: ID,
+): Encoded<string, EncodableObject> | null {
+  if (sync.set.id === id) return sync.set
+
+  const desc = sync.objectValues[id]
+  if (desc) return desc
+
+  for (const child of Object.values(sync.setValues)) {
+    const childDesc = findDescriptor(child, id)
+    if (childDesc) return childDesc
+  }
+
+  return null
 }
