@@ -118,7 +118,7 @@ export function encodeBase64(data: Uint8Array, prefix: string = ''): string {
   for (let i = 0; i < data.length; i++) {
     binary += String.fromCharCode(data[i])
   }
-  return 'u' + window.btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
+  return 'u' + globalThis.btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
 }
 
 /**
@@ -139,7 +139,7 @@ export function encodeBase64Sha256(data: Uint8Array): string {
 export function decodeBase64(input: string, into: Uint8Array): void {
   if (input[0] !== 'u') throw new Error('Invalid base64')
 
-  const binary = window.atob(input.slice(1).replaceAll('-', '+').replaceAll('_', '/'))
+  const binary = globalThis.atob(input.slice(1).replaceAll('-', '+').replaceAll('_', '/'))
   for (let i = 0; i < binary.length; i++) {
     into[i] = binary.charCodeAt(i)
   }
