@@ -19,14 +19,14 @@ This ensures a consistent hash even when a descriptor is used across different l
 
 | Tag            | Value (byte) |
 | -------------- | ------------ |
-| `NULL`         | `0`          |
-| `TRUE`         | `1`          |
-| `FALSE`        | `2`          |
-| `STRING`       | `3`          |
-| `ARRAY_START`  | `4`          |
-| `ARRAY_END`    | `5`          |
-| `OBJECT_START` | `6`          |
-| `OBJECT_END`   | `7`          |
+| `NULL`         | `n` (0x6e)   |
+| `TRUE`         | `t` (0x74)   |
+| `FALSE`        | `f` (0x66)   |
+| `STRING`       | `s` (0x73)   |
+| `ARRAY_START`  | `a` (0x61)   |
+| `ARRAY_END`    | `A` (0x41)   |
+| `OBJECT_START` | `o` (0x6f)   |
+| `OBJECT_END`   | `O` (0x4f)   |
 
 Algorithm:
 

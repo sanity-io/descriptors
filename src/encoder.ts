@@ -26,14 +26,14 @@ export type EncodableObject = {[key: string]: EncodableValue | undefined}
 // Not sure why, but ESLint thinks that this shadows an existing identifier.
 // eslint-disable-next-line no-shadow
 enum Tag {
-  NULL = 0,
-  TRUE = 1,
-  FALSE = 2,
-  STRING = 3,
-  ARRAY_START = 4,
-  ARRAY_END = 5,
-  OBJECT_START = 6,
-  OBJECT_END = 7,
+  NULL = 0x64,
+  TRUE = 0x74,
+  FALSE = 0x66,
+  STRING = 0x73,
+  ARRAY_START = 0x61,
+  ARRAY_END = 0x41,
+  OBJECT_START = 0x6f,
+  OBJECT_END = 0x4f,
 }
 
 const MULTIHASH_SHA256 = '\x12\x20'
