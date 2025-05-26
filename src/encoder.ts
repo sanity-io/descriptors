@@ -15,13 +15,7 @@ export type Encoded<T extends string, U extends EncodableObject> = U & {id: ID; 
  *
  * @public
  */
-export type EncodableValue =
-  | EncodableObject
-  | Array<EncodableValue>
-  | boolean
-  | number
-  | string
-  | null
+export type EncodableValue = EncodableObject | Array<EncodableValue> | boolean | string | null
 
 /**
  * A JavaScript object which can be encoded as a descriptor.
@@ -35,12 +29,11 @@ enum Tag {
   NULL = 0,
   TRUE = 1,
   FALSE = 2,
-  NUMBER = 3,
-  STRING = 4,
-  ARRAY_START = 5,
-  ARRAY_END = 6,
-  OBJECT_START = 7,
-  OBJECT_END = 8,
+  STRING = 3,
+  ARRAY_START = 4,
+  ARRAY_END = 5,
+  OBJECT_START = 6,
+  OBJECT_END = 7,
 }
 
 const MULTIHASH_SHA256 = '\x12\x20'
@@ -74,9 +67,6 @@ class IDEncoder {
       this.encodeByte(Tag.TRUE)
     } else if (val === false) {
       this.encodeByte(Tag.FALSE)
-    } else if (typeof val === 'number') {
-      this.encodeByte(Tag.NUMBER)
-      this.encodeInt32(val)
     } else if (typeof val === 'string') {
       this.encodeByte(Tag.STRING)
       this.encodeString(val)
