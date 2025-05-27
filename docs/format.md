@@ -9,8 +9,7 @@
   In the future additional hash algorithms and encodings might be supported.
 - When receiving a descriptor from an untrusted source the descriptor should be hashed to validate that the `id` matches.
 - Numbers are not allowed, and you'll have to serialize them as a string instead.
-  This is because numbers in JSON are poorly specified.
-  There's very few guarantees that JSON numbers produced by one serializer will reliably be consistent with a different deserializer.
+  This is because numbers in JSON are poorly specified and there's very few guarantees that JSON numbers produced by one serializer will reliably be consistent with a different deserializer.
 
 ## Hashing algorithm
 
