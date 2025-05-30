@@ -63,7 +63,6 @@ jobs:
         with:
           app-id: ${{ secrets.ECOSPARK_APP_ID }}
           private-key: ${{ secrets.ECOSPARK_APP_PRIVATE_KEY }}
-      - uses: pnpm/action-setup@v2
       - uses: actions/checkout@v4
         with:
           # Need to fetch entire commit history to
@@ -73,6 +72,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
           persist-credentials: false
+      - uses: pnpm/action-setup@v2
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
