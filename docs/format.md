@@ -38,8 +38,12 @@ Algorithm:
   - Loop over each element and emit each value recursively.
   - Emit `ARRAY_END`.
 - If the value is an object:
-  - Emit `OBJECT_START`.
   - Loop over each pair:
-    - Emit the key as an UTF-8 encoded string.
-    - Emit the value recursively.
+    - Start a new stream.
+    - Emit the key as an UTF-8 encoded string to that stream.
+    - Emit the value recursively to that stream.
+    - Produce the hash of that stream.
+  - Emit `OBJECT_START`.
+  - Loop over the hashes in order:
+    - Emit the hash.
   - Emit `OBJECT_END`.

@@ -1,4 +1,5 @@
 import {Hash} from 'sha256-uint8array'
+import {arrayCompare} from './utils'
 
 /** The ID if a descriptor. */
 export type ID = string
@@ -8,7 +9,10 @@ export type ID = string
  *
  * @public
  */
-export type Encoded<T extends string, U extends EncodableObject> = U & {id: ID; type: T}
+export type Encoded<T extends string, U extends EncodableObject = EncodableObject> = U & {
+  id: ID
+  type: T
+}
 
 /**
  * The subset of values which we can encode.
@@ -26,7 +30,7 @@ export type EncodableObject = {[key: string]: EncodableValue | undefined}
 // Not sure why, but ESLint thinks that this shadows an existing identifier.
 // eslint-disable-next-line no-shadow
 enum Tag {
-  NULL = 0x64,
+  NULL = 0x6e,
   TRUE = 0x74,
   FALSE = 0x66,
   STRING = 0x73,
@@ -77,27 +81,53 @@ class IDEncoder {
       }
       this.encodeByte(Tag.ARRAY_END)
     } else {
-      this.encodeByte(Tag.OBJECT_START)
-      for (const key of Object.keys(val).sort()) {
-        const field = val[key]
+      const digests = []
+
+      for (const [key, field] of Object.entries(val)) {
         if (field === undefined) {
           continue
         }
 
-        this.encodeString(key)
-        this.encodeValue(field)
+        const fieldEncoder = new IDEncoder()
+        fieldEncoder.encodeString(key)
+        fieldEncoder.encodeValue(field)
+        digests.push(fieldEncoder.getDigest())
+      }
+
+      digests.sort((a, b) => arrayCompare(a, b))
+
+      this.encodeByte(Tag.OBJECT_START)
+      for (const digest of digests) {
+        this.hash.update(digest)
       }
       this.encodeByte(Tag.OBJECT_END)
     }
   }
 
   encodeObjectWithType(type: string, val: EncodableObject) {
+    const digests = []
+
+    for (const [key, field] of Object.entries(val)) {
+      if (field === undefined) {
+        continue
+      }
+
+      const fieldEncoder = new IDEncoder()
+      fieldEncoder.encodeString(key)
+      fieldEncoder.encodeValue(field)
+      digests.push(fieldEncoder.getDigest())
+    }
+
+    const typeEncoder = new IDEncoder()
+    typeEncoder.encodeString('type')
+    typeEncoder.encodeValue(type)
+    digests.push(typeEncoder.getDigest())
+
+    digests.sort((a, b) => arrayCompare(a, b))
+
     this.encodeByte(Tag.OBJECT_START)
-    for (const key of ['type', ...Object.keys(val)].sort()) {
-      const field = key === 'type' ? type : val[key]
-      if (field === undefined) continue
-      this.encodeString(key)
-      this.encodeValue(field)
+    for (const digest of digests) {
+      this.hash.update(digest)
     }
     this.encodeByte(Tag.OBJECT_END)
   }
