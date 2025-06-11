@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "keywords": [],
+  "repository": {
+    "url": "https://github.com/sanity-io/descriptors"
+  },
   "license": "MIT",
   "author": "Magnus Holm <holm@sanity.io>",
   "sideEffects": false,
