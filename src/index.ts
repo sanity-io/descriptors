@@ -7,4 +7,15 @@ export {
   type Encoded,
 } from './encoder'
 export {SetSketch} from './reconciler'
-export {type EncodedSet, SetBuilder, type SetSynchronization} from './set'
+export {
+  type EncodedSet,
+  processSetSynchronization,
+  SetBuilder,
+  type SetSynchronization,
+} from './set'
+export {
+  type SynchronizationRequest,
+  type SynchronizationResponse,
+  type SynchronizationResponseIncomplete,
+  type SynchronizationResponseSuccess,
+} from './sync'
