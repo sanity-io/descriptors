@@ -102,6 +102,7 @@ export class SetBuilder {
  * @param sync The set to synchronize.
  * @param prevResponse The response from the previous request.
  * @returns `null` when the synchronization is complete, or a request which should be sent.
+ * @public
  */
 export function processSetSynchronization<Type extends string>(
   sync: SetSynchronization<Type>,
