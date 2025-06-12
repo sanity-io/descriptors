@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.0](https://github.com/sanity-io/descriptors/compare/v1.0.0...v1.1.0) (2025-06-12)
+
+### Features
+
+- use new terminology for synchronization ([4713dc7](https://github.com/sanity-io/descriptors/commit/4713dc78d47b57970958129e6b121a09621396ac))
+
 ## [1.0.0](https://github.com/sanity-io/descriptors/compare/v0.1.1...v1.0.0) (2025-06-11)
 
 ### ⚠ BREAKING CHANGES
