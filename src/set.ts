@@ -1,6 +1,6 @@
 import {type EncodableObject, encode, type Encoded, type ID} from './encoder'
 import {SetSketch} from './reconciler'
-import type {SynchronizationRequest, SynchronizationResponse} from './sync'
+import type {SynchronizationRequest, SynchronizationResult} from './sync'
 
 /**
  * A set descriptor. This follows the very specific form with a property called
@@ -93,29 +93,29 @@ export class SetBuilder {
 /**
  * The main logic for synchronizing a set to a server.
  *
- * Initially this function should be invoked with `prevResponse` set to `null`.
+ * Initially this function should be invoked with `prevResult` set to `null`.
  * This returns a SynchronizationRequest which should then be sent to a server.
- * Once the server returns a response this function should be invoked with this
+ * Once the server returns a result this function should be invoked with this
  * as a parameter. This proccess should be continued until this function return
  * `null`.
  *
  * @param sync The set to synchronize.
- * @param prevResponse The response from the previous request.
+ * @param prevResult The result from the previous synchronization.
  * @returns `null` when the synchronization is complete, or a request which should be sent.
  * @public
  */
 export function processSetSynchronization<Type extends string>(
   sync: SetSynchronization<Type>,
-  prevResponse: SynchronizationResponse | null,
+  prevResult: SynchronizationResult | null,
 ): SynchronizationRequest | null {
   const id = sync.set.id
-  if (!prevResponse) return {id}
+  if (!prevResult) return {id}
 
-  if (prevResponse.type === 'success') return null
+  if (prevResult.type === 'complete') return null
 
   const descriptors: Array<Encoded<string, EncodableObject>> = []
 
-  for (const missingId of prevResponse.missingIds) {
+  for (const missingId of prevResult.missingIds) {
     const descriptor = findDescriptor(sync, missingId)
     if (!descriptor) throw new Error(`Synchronization server is requested an unknonwn descriptor`)
     descriptors.push(descriptor)

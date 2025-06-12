@@ -27,7 +27,7 @@ describe(processSetSynchronization.name, () => {
   })
 
   it('returns null on succeess', () => {
-    const request = processSetSynchronization(sync, {type: 'success'})
+    const request = processSetSynchronization(sync, {type: 'complete'})
     expect(request).toBeNull()
   })
 
