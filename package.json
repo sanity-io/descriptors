@@ -29,6 +29,7 @@
     "build": "pkg build --strict --clean --check",
     "format": "prettier --write --cache --ignore-unknown .",
     "lint": "eslint . --ext .cjs,.js,.ts,.tsx",
+    "prepublishOnly": "pkg build --strict --clean --check",
     "test": "vitest",
     "ts:check": "tsc --noEmit"
   },
