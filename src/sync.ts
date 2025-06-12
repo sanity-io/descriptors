@@ -13,22 +13,20 @@ export type SynchronizationRequest = {
 }
 
 /**
- * The response from a server which supports descriptor synchronization.
+ * The result from a server which supports descriptor synchronization.
  *
  * @public
  */
-export type SynchronizationResponse =
-  | SynchronizationResponseSuccess
-  | SynchronizationResponseIncomplete
+export type SynchronizationResult = SynchronizationResultComplete | SynchronizationResultIncomplete
 
 /**
- * SynchronizationResponseSuccess is returned from a synchronization server when
- * the requested descriptor has been successfully synchronized.
+ * SynchronizationResultComplete is returned from a synchronization server when
+ * the requested descriptor has been completely synchronized.
  *
  * @public
  */
-export type SynchronizationResponseSuccess = {
-  type: 'success'
+export type SynchronizationResultComplete = {
+  type: 'complete'
 }
 
 /**
@@ -37,7 +35,7 @@ export type SynchronizationResponseSuccess = {
  *
  * @public
  */
-export type SynchronizationResponseIncomplete = {
+export type SynchronizationResultIncomplete = {
   type: 'incomplete'
 
   /**

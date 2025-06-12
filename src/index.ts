@@ -15,7 +15,13 @@ export {
 } from './set'
 export {
   type SynchronizationRequest,
-  type SynchronizationResponse,
-  type SynchronizationResponseIncomplete,
-  type SynchronizationResponseSuccess,
+
+  type SynchronizationResult,
+  type SynchronizationResultIncomplete,
+  type SynchronizationResultComplete,
+
+  // For backwards compatibility.
+  type SynchronizationResult as SynchronizationResponse,
+  type SynchronizationResultIncomplete as SynchronizationResponseIncomplete,
+  type SynchronizationResultComplete as SynchronizationResponseSuccess,
 } from './sync'
