@@ -32,6 +32,13 @@ export interface SetSynchronization<Type extends string> {
   sketch: SetSketch
 }
 
+export type SetBuilderOptions = {
+  /**
+   * See {@link encode}
+   */
+  rewriteMap?: Map<EncodableObject, EncodableObject>
+}
+
 /**
  * SetBuilder is a class which helps you construct a set for efficient synchronization.
  *
@@ -42,6 +49,11 @@ export class SetBuilder {
   private setValues: Record<string, SetSynchronization<string>> = {}
   private keys: string[] = []
   private sketch: SetSketch = new SetSketch(32, 8)
+  private rewriteMap: Map<EncodableObject, EncodableObject> | undefined
+
+  constructor({rewriteMap}: SetBuilderOptions = {}) {
+    this.rewriteMap = rewriteMap
+  }
 
   /**
    * Add an object to the set.
@@ -51,6 +63,7 @@ export class SetBuilder {
       withDigest: (digest) => {
         this.sketch.toggle(digest)
       },
+      rewriteMap: this.rewriteMap,
     })
     this.objectValues[value.id] = value
     this.keys.push(value.id)

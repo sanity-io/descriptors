@@ -1,4 +1,5 @@
 import {Hash} from 'sha256-uint8array'
+
 import {arrayCompare} from './utils'
 
 /** The ID if a descriptor. */
@@ -45,9 +46,14 @@ const MULTIHASH_SHA256 = '\x12\x20'
 class IDEncoder {
   hash: Hash = new Hash()
   buffer: ArrayBuffer = new ArrayBuffer(4)
+  rewriteMap: Map<EncodableObject, EncodableObject>
   uint8 = new Uint8Array(this.buffer)
   uint8_byte = new Uint8Array(this.buffer, 0, 1)
   int32 = new Int32Array(this.buffer)
+
+  constructor(rewriteMap: Map<EncodableObject, EncodableObject>) {
+    this.rewriteMap = rewriteMap
+  }
 
   encodeByte(byte: number) {
     this.uint8_byte[0] = byte
@@ -64,33 +70,65 @@ class IDEncoder {
     this.hash.update(this.uint8)
   }
 
-  encodeValue(val: EncodableValue) {
+  /**
+   * Encodes a value.
+   *
+   * Since values can be rewritten during encoding this returns the actual value that was encoded.
+   * This may be the exact same object that was passed in.
+   */
+  encodeValue(val: EncodableValue): EncodableValue {
     if (val === null) {
       this.encodeByte(Tag.NULL)
+      return val
     } else if (val === true) {
       this.encodeByte(Tag.TRUE)
+      return val
     } else if (val === false) {
       this.encodeByte(Tag.FALSE)
+      return val
     } else if (typeof val === 'string') {
       this.encodeByte(Tag.STRING)
       this.encodeString(val)
+      return val
     } else if (Array.isArray(val)) {
+      // We set this array once we've discovered that something was rewritten.
+      let result: Array<EncodableValue> | undefined
+
       this.encodeByte(Tag.ARRAY_START)
+      let idx = 0
       for (const elem of val) {
-        this.encodeValue(elem)
+        const other = this.encodeValue(elem)
+        if (result) {
+          result.push(other)
+        } else if (other !== elem) {
+          result = val.slice(0, idx)
+          result.push(other)
+        }
+
+        idx++
       }
       this.encodeByte(Tag.ARRAY_END)
+      return result || val
     } else {
+      const other = this.rewriteMap.get(val)
+      if (other) {
+        return this.encodeValue(other)
+      }
+
       const digests = []
+      const result: EncodableObject = {}
+      let didChange = false
 
       for (const [key, field] of Object.entries(val)) {
         if (field === undefined) {
           continue
         }
 
-        const fieldEncoder = new IDEncoder()
+        const fieldEncoder = new IDEncoder(this.rewriteMap)
         fieldEncoder.encodeString(key)
-        fieldEncoder.encodeValue(field)
+        const fieldValue = fieldEncoder.encodeValue(field)
+        if (fieldValue !== field) didChange = true
+        result[key] = fieldValue
         digests.push(fieldEncoder.getDigest())
       }
 
@@ -101,10 +139,17 @@ class IDEncoder {
         this.hash.update(digest)
       }
       this.encodeByte(Tag.OBJECT_END)
+
+      return didChange ? result : val
     }
   }
 
-  encodeObjectWithType(type: string, val: EncodableObject) {
+  encodeObjectWithType<Type extends string, Props extends EncodableObject>(
+    type: Type,
+    val: Props,
+  ): Props & {type: Type} {
+    const result: EncodableObject & {type: Type} = {type}
+
     const digests = []
 
     for (const [key, field] of Object.entries(val)) {
@@ -112,13 +157,13 @@ class IDEncoder {
         continue
       }
 
-      const fieldEncoder = new IDEncoder()
+      const fieldEncoder = new IDEncoder(this.rewriteMap)
       fieldEncoder.encodeString(key)
-      fieldEncoder.encodeValue(field)
+      result[key] = fieldEncoder.encodeValue(field)
       digests.push(fieldEncoder.getDigest())
     }
 
-    const typeEncoder = new IDEncoder()
+    const typeEncoder = new IDEncoder(this.rewriteMap)
     typeEncoder.encodeString('type')
     typeEncoder.encodeValue(type)
     digests.push(typeEncoder.getDigest())
@@ -130,6 +175,7 @@ class IDEncoder {
       this.hash.update(digest)
     }
     this.encodeByte(Tag.OBJECT_END)
+    return result as Props & {type: Type}
   }
 
   getDigest() {
@@ -175,6 +221,8 @@ export function decodeBase64(input: string, into: Uint8Array): void {
   }
 }
 
+const EMPTY_REWRITE_MAP = new Map<EncodableObject, EncodableObject>()
+
 /**
  * Encodes an object with the given type.
  */
@@ -187,12 +235,17 @@ export function encode<Type extends string, Props extends EncodableObject>(
      * `id` in encoded form.
      **/
     withDigest?: (digest: Uint8Array) => void
+    /**
+     * A map of objects that will be rewritten.
+     * Any of the keys that are seen will be replaced with the value.
+     */
+    rewriteMap?: Map<EncodableObject, EncodableObject>
   },
 ): Encoded<Type, Props> {
-  const idEncoder = new IDEncoder()
-  idEncoder.encodeObjectWithType(type, props)
+  const idEncoder = new IDEncoder(options?.rewriteMap || EMPTY_REWRITE_MAP)
+  const tweakedProps = idEncoder.encodeObjectWithType<Type, Props>(type, props)
   const digest = idEncoder.getDigest()
   if (options?.withDigest) options.withDigest(digest)
   const id = encodeBase64(digest, MULTIHASH_SHA256)
-  return {id, type, ...props}
+  return {id, ...tweakedProps}
 }
