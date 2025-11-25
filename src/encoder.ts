@@ -120,10 +120,12 @@ class IDEncoder {
       return result || val
     } else {
       const digests = []
-      const result: EncodableObject = {}
-      let didChange = false
+      let result: EncodableObject | undefined
 
-      for (const [key, field] of Object.entries(val)) {
+      let idx = 0
+      const entries = Object.entries(val)
+
+      for (const [key, field] of entries) {
         if (field === undefined) {
           continue
         }
@@ -131,9 +133,20 @@ class IDEncoder {
         const fieldEncoder = new IDEncoder(this.rewriteMap)
         fieldEncoder.encodeString(key)
         const fieldValue = fieldEncoder.encodeValue(field)
-        if (fieldValue !== field) didChange = true
-        result[key] = fieldValue
         digests.push(fieldEncoder.getDigest())
+
+        if (result) {
+          result[key] = fieldValue
+        } else if (fieldValue !== field) {
+          // This is the first time we've detected a new value.
+          result = {}
+          for (const [prevKey, prevField] of entries.slice(0, idx)) {
+            result[prevKey] = prevField
+          }
+          result[key] = fieldValue
+        }
+
+        idx++
       }
 
       digests.sort((a, b) => arrayCompare(a, b))
@@ -144,7 +157,7 @@ class IDEncoder {
       }
       this.encodeByte(Tag.OBJECT_END)
 
-      return didChange ? result : val
+      return result || val
     }
   }
 
