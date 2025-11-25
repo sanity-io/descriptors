@@ -5,6 +5,17 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.0](https://github.com/sanity-io/descriptors/compare/v1.1.1...v1.2.0) (2025-11-25)
+
+### Features
+
+- add support for `rewriteMap` ([27e51e3](https://github.com/sanity-io/descriptors/commit/27e51e32563da56eb4b45419b455b35f6ba1f862))
+- improve rewriteMap ([2d9c941](https://github.com/sanity-io/descriptors/commit/2d9c94135743b4e738e6654803292913897cc568))
+
+### Performance Improvements
+
+- minimize allocations when no rewrites ([911d0a7](https://github.com/sanity-io/descriptors/commit/911d0a71e7c7223c6008f55a161d4f37c0a1d248))
+
 ## [1.1.1](https://github.com/sanity-io/descriptors/compare/v1.1.0...v1.1.1) (2025-06-12)
 
 ### Bug Fixes
