@@ -46,12 +46,12 @@ const MULTIHASH_SHA256 = '\x12\x20'
 class IDEncoder {
   hash: Hash = new Hash()
   buffer: ArrayBuffer = new ArrayBuffer(4)
-  rewriteMap: Map<EncodableObject, EncodableObject>
+  rewriteMap: Map<EncodableValue, EncodableValue>
   uint8 = new Uint8Array(this.buffer)
   uint8_byte = new Uint8Array(this.buffer, 0, 1)
   int32 = new Int32Array(this.buffer)
 
-  constructor(rewriteMap: Map<EncodableObject, EncodableObject>) {
+  constructor(rewriteMap: Map<EncodableValue, EncodableValue>) {
     this.rewriteMap = rewriteMap
   }
 
@@ -77,6 +77,15 @@ class IDEncoder {
    * This may be the exact same object that was passed in.
    */
   encodeValue(val: EncodableValue): EncodableValue {
+    const rewritten = this.rewriteMap.get(val)
+    if (rewritten) {
+      const result = this.encodeValue(rewritten)
+      // If this turned out to be a different value, then we can update the rewriteMap.
+      // This will only trigger on recursive rewrites.
+      if (result !== rewritten) this.rewriteMap.set(val, result)
+      return result
+    }
+
     if (val === null) {
       this.encodeByte(Tag.NULL)
       return val
@@ -110,11 +119,6 @@ class IDEncoder {
       this.encodeByte(Tag.ARRAY_END)
       return result || val
     } else {
-      const other = this.rewriteMap.get(val)
-      if (other) {
-        return this.encodeValue(other)
-      }
-
       const digests = []
       const result: EncodableObject = {}
       let didChange = false
@@ -239,7 +243,7 @@ export function encode<Type extends string, Props extends EncodableObject>(
      * A map of objects that will be rewritten.
      * Any of the keys that are seen will be replaced with the value.
      */
-    rewriteMap?: Map<EncodableObject, EncodableObject>
+    rewriteMap?: Map<EncodableValue, EncodableValue>
   },
 ): Encoded<Type, Props> {
   const idEncoder = new IDEncoder(options?.rewriteMap || EMPTY_REWRITE_MAP)
