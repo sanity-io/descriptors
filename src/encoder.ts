@@ -127,6 +127,7 @@ class IDEncoder {
 
       for (const [key, field] of entries) {
         if (field === undefined) {
+          idx++
           continue
         }
 
