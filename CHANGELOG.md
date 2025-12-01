@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/sanity-io/descriptors/compare/v1.2.0...v1.2.1) (2025-12-01)
+
+### Bug Fixes
+
+- rewriteMap with fields with undefined values ([3169970](https://github.com/sanity-io/descriptors/commit/3169970a1d8d9e4327c1955806ef4a5cb8971415))
+
 ## [1.2.0](https://github.com/sanity-io/descriptors/compare/v1.1.1...v1.2.0) (2025-11-25)
 
 ### Features
