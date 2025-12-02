@@ -243,6 +243,8 @@ const EMPTY_REWRITE_MAP = new Map<EncodableObject, EncodableObject>()
 
 /**
  * Encodes an object with the given type.
+ *
+ * @public
  */
 export function encode<Type extends string, Props extends EncodableObject>(
   type: Type,
