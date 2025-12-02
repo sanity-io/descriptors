@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.0](https://github.com/sanity-io/descriptors/compare/v1.2.1...v1.3.0) (2025-12-02)
+
+### Features
+
+- make `encode` public ([571dea3](https://github.com/sanity-io/descriptors/commit/571dea3976fbedb0fd2796a069085c159ee89f08))
+
 ## [1.2.1](https://github.com/sanity-io/descriptors/compare/v1.2.0...v1.2.1) (2025-12-01)
 
 ### Bug Fixes
