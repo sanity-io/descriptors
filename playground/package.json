@@ -14,7 +14,7 @@
     "@sanity/descriptors": "link:..",
     "@sanity/ui": "^2.15.17",
     "@tailwindcss/vite": "^4.1.6",
-    "react": "^19.1.0",
+    "react": "19.2.1",
     "react-dom": "^19.1.0",
     "styled-components": "^6.1.18",
     "tailwindcss": "^4.1.6"
